@@ -6,6 +6,7 @@ import org.example.paymentservice.payment.domain.PaymentStatus
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Component
 import org.springframework.transaction.reactive.TransactionalOperator
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 
@@ -48,11 +49,36 @@ class R2DBCPaymentDatabaseHelper(
             }.toMono().block()
     }
 
+    override fun clean(): Mono<Void> {
+        return deletePaymentOrders()
+            .flatMap { deletePaymentEvents() }
+            .`as` (transactionalOperator::transactional)
+            .then()
+    }
+
+    private fun deletePaymentOrders(): Mono<Long> =
+        databaseClient.sql(DELETE_PAYMENT_ORDERS_QUERY)
+            .fetch()
+            .rowsUpdated()
+
+    private fun deletePaymentEvents(): Mono<Long> =
+        databaseClient.sql(DELETE_PAYMENT_EVENTS_QUERY)
+            .fetch()
+            .rowsUpdated()
+
     companion object {
         val SELECT_PAYMENT_QUERY = """
             SELECT * FROM payment_events pe
             INNER JOIN payment_orders po ON pe.order_id = po.order_id
             WHERE pe.order_id = :orderId
+        """.trimIndent()
+
+        val DELETE_PAYMENT_ORDERS_QUERY = """
+            DELETE FROM payment_orders
+        """.trimIndent()
+
+        val DELETE_PAYMENT_EVENTS_QUERY = """
+            DELETE FROM payment_events
         """.trimIndent()
     }
 }
