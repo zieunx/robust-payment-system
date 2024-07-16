@@ -7,7 +7,7 @@ data class PaymentExecutionResult(
     val paymentKey: String,
     val orderId: String,
     val extraDetails: PaymentExtraDetails? = null,
-    val failure: PaymentExecutionFailure? = null,
+    val failure: PaymentFailure? = null,
     val isSuccess: Boolean,
     val isFailure: Boolean,
     val isUnknown: Boolean,
@@ -18,7 +18,7 @@ data class PaymentExecutionResult(
             isSuccess -> PaymentStatus.SUCCESS
             isFailure -> PaymentStatus.FAILURE
             isUnknown -> PaymentStatus.UNKNOWN
-            else -> error("결제 (orderId: $orderId) 는 올바르지 않은 결제 상태 이빈다.")
+            else -> error("결제 (orderId: $orderId) 는 올바르지 않은 결제 상태 입니다.")
         }
     }
 
@@ -37,9 +37,4 @@ data class PaymentExtraDetails(
     val pspConfirmationStatus: PSPConfirmationStatus,
     val totalAmount: Long,
     val pspRawData: String,
-)
-
-data class PaymentExecutionFailure(
-    val errorCode: String,
-    val message: String,
 )

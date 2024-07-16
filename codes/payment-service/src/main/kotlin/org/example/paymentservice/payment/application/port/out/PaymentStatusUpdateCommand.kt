@@ -1,6 +1,6 @@
 package org.example.paymentservice.payment.application.port.out
 
-import org.example.paymentservice.payment.domain.PaymentExecutionFailure
+import org.example.paymentservice.payment.domain.PaymentFailure
 import org.example.paymentservice.payment.domain.PaymentExtraDetails
 import org.example.paymentservice.payment.domain.PaymentStatus
 
@@ -9,7 +9,7 @@ data class PaymentStatusUpdateCommand(
     val orderId: String,
     val status: PaymentStatus,
     val extraDetails: PaymentExtraDetails? = null,
-    val failure: PaymentExecutionFailure? = null,
+    val failure: PaymentFailure? = null,
 ) {
     init {
         require(status == PaymentStatus.SUCCESS || status == PaymentStatus.FAILURE || status == PaymentStatus.UNKNOWN) {
@@ -19,7 +19,7 @@ data class PaymentStatusUpdateCommand(
         if (status == PaymentStatus.SUCCESS) {
             requireNotNull(extraDetails) { "PaymentStatus 값이 SUCCESS 면, PaymentExtraDetails 는 null 이 되면 안됩니다." }
         } else if (status == PaymentStatus.FAILURE) {
-            requireNotNull(failure) { "PaymentStatus 값이  FAILURE 면, PaymentExecutionFailure 는 null 이 되면 안됩니다." }
+            requireNotNull(failure) { "PaymentStatus 값이  FAILURE 면, PaymentFailure 는 null 이 되면 안됩니다." }
         }
     }
 }

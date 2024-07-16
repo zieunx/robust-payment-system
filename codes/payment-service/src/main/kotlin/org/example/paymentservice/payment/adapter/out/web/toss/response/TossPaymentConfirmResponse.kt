@@ -31,7 +31,7 @@ data class TossPaymentConfirmResponse(
     val checkout: Checkout?,
     val easyPay: EasyPay?,
     val country: String?,
-    val failure: Failure?,
+    val tossFailureResponse: TossFailureResponse?,
     val cashReceipt: CashReceipt?,
     val cashReceipts: List<CashReceipt>?,
     val discount: Discount?
@@ -110,7 +110,7 @@ data class EasyPay(
     val discountAmount: Double
 )
 
-data class Failure(
+data class TossFailureResponse(
     val code: String,
     val message: String
 )
@@ -127,7 +127,7 @@ data class CashReceipt(
     val businessNumber: String,
     val transactionType: String,
     val issueStatus: String,
-    val failure: Failure,
+    val tossFailureResponse: TossFailureResponse,
     val customerIdentityNumber: String,
     val requestedAt: String
 )

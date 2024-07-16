@@ -2,12 +2,12 @@ package org.example.paymentservice.payment.domain
 
 data class PaymentConfirmationResult (
     val status: PaymentStatus,
-    val failure: PaymentExecutionFailure? = null,
+    val failure: PaymentFailure? = null,
 ) {
     init {
         if (status == PaymentStatus.FAILURE) {
             requireNotNull(failure) {
-                "결제 상태 FAILURE 일 때 PaymentExecutionFailure 는 null 값이 될 수 없습니다."
+                "결제 상태 FAILURE 일 때 PaymentFailure 는 null 값이 될 수 없습니다."
             }
         }
     }
