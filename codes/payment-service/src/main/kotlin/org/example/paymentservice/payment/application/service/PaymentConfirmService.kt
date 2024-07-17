@@ -21,6 +21,7 @@ class PaymentConfirmService(
     private val paymentStatusUpdatePort: PaymentStatusUpdatePort,
     private val paymentValidationPort: PaymentValidationPort,
     private val paymentExecutorPort: PaymentExecutorPort,
+    private val paymentErrorHandler: PaymentErrorHandler,
 ) : PaymentConfirmUseCase {
 
     override fun confirm(command: PaymentConfirmCommand): Mono<PaymentConfirmationResult> {
@@ -40,47 +41,7 @@ class PaymentConfirmService(
             }
             .map { PaymentConfirmationResult(status = it.paymentStatus(), failure = it.failure) }
             .onErrorResume { error ->
-                handlePaymentError(error, command)
+                paymentErrorHandler.handlePaymentConfirmationError(error, command)
             }
-    }
-
-    private fun handlePaymentError(
-        error: Throwable,
-        command: PaymentConfirmCommand
-    ): Mono<PaymentConfirmationResult> {
-        val (status, failure) = when (error) {
-            is PSPConfirmationException -> Pair(
-                error.paymentStatus(),
-                PaymentFailure(error.errorCode, error.errorMessage)
-            )
-
-            is PaymentValidationException -> Pair(
-                PaymentStatus.FAILURE,
-                PaymentFailure(error::class.simpleName ?: "", error.message ?: "")
-            )
-
-            is PaymentAlreadyProcessException -> return Mono.just(
-                PaymentConfirmationResult(
-                    status = error.status,
-                    PaymentFailure(errorCode = error::class.simpleName ?: "", error.message ?: "")
-                )
-            )
-
-            is TimeoutException -> Pair(
-                PaymentStatus.UNKNOWN,
-                PaymentFailure(error::class.simpleName ?: "", error.message ?: "")
-            )
-
-            else -> Pair(PaymentStatus.UNKNOWN, PaymentFailure(error::class.simpleName ?: "", error.message ?: ""))
-        }
-
-        val paymentStatusUpdateCommand = PaymentStatusUpdateCommand(
-            paymentKey = command.paymentKey,
-            orderId = command.orderId,
-            status = status,
-            failure = failure,
-        )
-        return paymentStatusUpdatePort.updatePaymentStatus(paymentStatusUpdateCommand)
-            .map { PaymentConfirmationResult(status, failure) }
     }
 }
