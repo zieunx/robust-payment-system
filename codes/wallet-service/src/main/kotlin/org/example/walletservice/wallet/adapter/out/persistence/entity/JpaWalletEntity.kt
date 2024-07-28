@@ -5,7 +5,7 @@ import java.math.BigDecimal
 
 @Entity
 @Table(name = "wallets")
-class JpaWalletEntity (
+data class JpaWalletEntity (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
@@ -18,4 +18,10 @@ class JpaWalletEntity (
 
     @Version // 동시성 방지.
     val version: Int,
-)
+) {
+    fun addBalance(bigDecimal: BigDecimal): JpaWalletEntity {
+        return copy(
+            balance = balance,
+        )
+    }
+}

@@ -7,12 +7,12 @@ data class Wallet(
     val userId: Long,
     val version: Int,
     val balance: BigDecimal,
-    val walletTransaction: List<WalletTransaction> = emptyList(),
+    val walletTransactions: List<WalletTransaction> = emptyList(),
 ) {
     fun calculateBalanceWith(items: List<Item>): Wallet {
         return copy(
             balance = balance + BigDecimal(items.sumOf { it.amount }),
-            walletTransaction = items.map {
+            walletTransactions = items.map {
                 WalletTransaction(
                     walletId = this.id,
                     amount = it.amount,
