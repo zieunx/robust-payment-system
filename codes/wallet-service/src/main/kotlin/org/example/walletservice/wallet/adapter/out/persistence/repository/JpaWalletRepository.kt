@@ -11,15 +11,15 @@ import org.springframework.transaction.support.TransactionTemplate
 import java.math.BigDecimal
 
 @Repository
-class JpaWalletRepository(
+class JpaWalletRepository (
     private val springDataJpaWalletRepository: SpringDataJpaWalletRepository,
     private val jpaWalletMapper: JpaWalletMapper,
     private val walletTransactionRepository: WalletTransactionRepository,
     private val transactionTemplate: TransactionTemplate,
 ) : WalletRepository {
 
-    override fun getWallet(sellerId: Set<Long>): Set<Wallet> {
-        return springDataJpaWalletRepository.findByUserIdIn(sellerId)
+    override fun getWallets(sellerIds: Set<Long>): Set<Wallet> {
+        return springDataJpaWalletRepository.findByUserIdIn(sellerIds)
             .map { jpaWalletMapper.mapToDomainEntity(it) }
             .toSet()
     }
@@ -43,13 +43,14 @@ class JpaWalletRepository(
 
     private fun retrySaveOperation(wallets: List<Wallet>, maxRetries: Int = 3, baseDelay: Int = 100) {
         var retryCount = 0
+        println("retrySaveOperation $retryCount $maxRetries $baseDelay")
 
         while (true) {
             try {
                 performSaveOperationWithRecent(wallets)
                 break
             } catch (e: ObjectOptimisticLockingFailureException) {
-                if (++retryCount > maxRetries) {
+                if (retryCount++ > maxRetries) {
                     throw RetryExhaustedWithOptimisticLockingFailureException(e.message ?: "exhausted retry count.")
                 }
                 waitForNextRetry(baseDelay)
@@ -66,12 +67,15 @@ class JpaWalletRepository(
         }
 
         val updatedWallet = walletPairs.map {
-            it.second.addBalance(BigDecimal(it.first.walletTransactions.sumOf { it.amount }))
+            it.second.addBalance(
+                BigDecimal(it.first.walletTransactions.sumOf { walletTransaction -> walletTransaction.amount })
+            )
         }
 
         transactionTemplate.execute {
             springDataJpaWalletRepository.saveAll(updatedWallet)
             walletTransactionRepository.save(wallets.flatMap { it.walletTransactions })
+            println("retry 에서 저장 성공?")
         }
     }
 
@@ -79,6 +83,7 @@ class JpaWalletRepository(
         val jitter = (Math.random() * baseDelay).toLong()
 
         try {
+            println("waitForNextRetry. $jitter")
             Thread.sleep(jitter)
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()

@@ -20,7 +20,7 @@ class WalletPersistenceAdapter(
     }
 
     override fun getWallets(sellerIds: Set<Long>): Set<Wallet> {
-        return walletRepository.getWallet(sellerIds)
+        return walletRepository.getWallets(sellerIds)
     }
 
     override fun save(wallets: List<Wallet>) {
