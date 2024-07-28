@@ -28,6 +28,7 @@ import java.util.function.Supplier
 class PaymentEventMessageSender (
   private val paymentOutboxRepository: PaymentOutboxRepository
 ) : DispatchEventMessagePort {
+
   private val sender = Sinks.many().unicast().onBackpressureBuffer<Message<PaymentEventMessage>>()
   private val sendResult = Sinks.many().unicast().onBackpressureBuffer<SenderResult<String>>()
 

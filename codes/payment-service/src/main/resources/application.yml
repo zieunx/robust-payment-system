@@ -38,6 +38,9 @@ spring:
           destination: payment
           group: payment-service
 
+    function:
+      definition: send
+
 logging:
   level:
     org:
@@ -45,6 +48,7 @@ logging:
         web: DEBUG
         r2dbc: DEBUG
         transaction: DEBUG
+        kafka: TRACE
 
 PSP:
   toss:
