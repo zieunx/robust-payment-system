@@ -29,7 +29,7 @@ class JpaWalletRepositoryTest (
         springDataJpaWalletRepository.deleteAll()
     }
 
-    @Test
+    @RepeatedTest(5)
     fun `should update the balance of wallet successfully when execute the updated command at the same time`() {
         val jpaWalletEntity1 = JpaWalletEntity(
             userId = 1,
