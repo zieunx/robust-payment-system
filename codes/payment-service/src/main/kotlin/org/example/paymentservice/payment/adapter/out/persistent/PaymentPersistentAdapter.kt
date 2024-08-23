@@ -18,7 +18,7 @@ class PaymentPersistentAdapter(
     private val paymentStatusUpdateRepository: PaymentStatusUpdateRepository,
     private val paymentValidationRepository: PaymentValidationRepository,
     private val paymentOutboxRepository: PaymentOutboxRepository,
-) : SavePaymentPort, PaymentStatusUpdatePort, PaymentValidationPort, LoadPendingPaymentPort, LoadPendingPaymentEventMessagePort {
+) : SavePaymentPort, PaymentStatusUpdatePort, PaymentValidationPort, LoadPendingPaymentPort, LoadPendingPaymentEventMessagePort, LoadPaymentPort, CompletePaymentPort {
     override fun save(paymentEvent: PaymentEvent): Mono<Void> {
         return paymentRepository.save(paymentEvent)
     }
@@ -41,5 +41,13 @@ class PaymentPersistentAdapter(
 
     override fun getPendingPaymentEventMessage(): Flux<PaymentEventMessage> {
         return paymentOutboxRepository.getPendingPaymentOutboxes()
+    }
+
+    override fun getPayment(orderId: String): Mono<PaymentEvent> {
+        return paymentRepository.getPayment(orderId)
+    }
+
+    override fun complete(paymentEvent: PaymentEvent): Mono<Void> {
+        return paymentRepository.complete(paymentEvent)
     }
 }
